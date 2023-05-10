@@ -18,12 +18,15 @@ public class Log {
         this.stack = new Stack<>();
         this.dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     }
+    
+    public Log(String name) {
+        fileName = name;
+        this.stack = new Stack<>();
+        this.dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    }
 
     public synchronized void setName(String name) {
-        //System.out.println("name is:"+name);
         fileName = name;
-        //System.out.println("filename is:"+fileName);
-
     }
 
     public synchronized void add(String message) throws IOException {
@@ -55,14 +58,5 @@ public class Log {
         }
     }
 
-//
-//    public synchronized void writeToFile() throws IOException {
-//        
-//        FileWriter fileWriter = new FileWriter(fileName, true);
-//        try ( PrintWriter printWriter = new PrintWriter(fileWriter)) {
-//            while (!stack.empty()) {
-//                printWriter.println(stack.pop());
-//            }
-//        }
-//    }
+    
 }
