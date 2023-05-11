@@ -2,7 +2,6 @@ public class Product {
     private String name;
     private int basePrice;
     private boolean isSold;
-
     public Product(String name, int basePrice) {
         this.name = name;
         this.basePrice = basePrice;
@@ -24,6 +23,6 @@ public class Product {
         return name;
     }
     public String toString() {
-        return name + " " + basePrice + " " + isSold;
+        return  name + " " + basePrice + " " + isSold;
     }
 }

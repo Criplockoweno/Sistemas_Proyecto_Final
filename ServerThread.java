@@ -6,7 +6,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Map.Entry;
 
 public class ServerThread extends Thread {
 
@@ -14,6 +14,7 @@ public class ServerThread extends Thread {
     private ArrayList<ServerThread> threadList;
     private PrintWriter output;
     private Log log = new Log("server");
+    ManejadorSubastas Subastas = ManejadorSubastas.INSTANCE.getInstance();
 
     public ServerThread(Socket socket, ArrayList<ServerThread> threads) {
         this.socket = socket;
@@ -38,8 +39,6 @@ public class ServerThread extends Thread {
                 if (outputString.equals("exit")) {
                     break;
                 }
-                //printToALlClients(outputString);
-                //output.println("Server says " + outputString);
                 receiveCommand(outputString);
             }
 
@@ -55,24 +54,53 @@ public class ServerThread extends Thread {
 
         switch (splitCmd.get(1)) {
             case "addName" -> {
-                respondToClient("optionAddName");
-//                //if name exists, prin t welcome again Name
-//                log.add("User re-conected: " + splitCmd.get(2));
-//                respondToClient("Bienvenido de nuevo " + splitCmd.get(2));
-//                //else:
-//                //create new client, name splitCmd.get(2)
-//                log.add("User created: " + splitCmd.get(2));
-                
+                caseAddName(command);
             }
-            case "menu-1" -> {
+
+            case "menu-1" -> { //Suscripciones activas
                 respondToClient("option1");
+                User tempUSr = findUser(command);
             }
-            case "menu-2" -> {
-                respondToClient("option2");
+
+            case "menu-2" -> {//Subastas terminadas
+                for (Entry<Integer, Subasta> entry : Subastas.getSubastas().entrySet()) {
+                    if (entry.getValue().getIsOver()) {
+                        respondToClient(entry.toString());
+                    }
+                }
             }
-            case "menu-3" -> {
-                respondToClient("option3");
+
+            case "menu-3" -> {//Subastas activas
+                for (Entry<Integer, Subasta> entry : Subastas.getSubastas().entrySet()) {
+                    if (!entry.getValue().getIsOver()) {
+                        respondToClient(entry.toString());
+                    }
+
+                }
+                respondToClient("Ingresa el ID de la subasta para subscribirte, exit para salir");
+
             }
+
+            case "sub-menu-3" -> {//Subastas activas
+                int responseInt =0;
+                for (Entry<Integer, Subasta> entry : Subastas.getSubastas().entrySet()) {
+                    responseInt = Subastas.subcribeToSubasta(splitCmd.get(1), Integer.valueOf(splitCmd.get(3)));
+                }
+                switch(responseInt){
+                    case 0:
+                        respondToClient("No se ingreso ID de subasta");
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;    
+                }
+                respondToClient("Ingresa el ID de la subasta para subscribirte, exit para salir");
+
+            }
+
             default -> {
             }
         }
@@ -80,6 +108,36 @@ public class ServerThread extends Thread {
         //respondToClient("Hola cliente");
     }
 
+    private User findUser(String command){
+        ArrayList<String> splitCmd = new ArrayList<>(Arrays.asList(command.split("!!")));
+        User temp = null;
+        
+        for (Entry<String, User> entry : Subastas.getSubscribers().entrySet()) {
+            if (entry.getValue().getName().equals(splitCmd.get(1))) {
+                temp = entry.getValue();
+            }
+        }
+        return temp;
+    
+    }
+    
+    private void caseAddName(String command) throws IOException {
+        ArrayList<String> splitCmd = new ArrayList<>(Arrays.asList(command.split("!!")));
+        Boolean alreadyExisted = false;
+        for (Entry<String, User> entry : Subastas.getSubscribers().entrySet()) {
+            if (entry.getValue().getName().equals(splitCmd.get(2))) {
+                alreadyExisted = true;
+            }
+        }
+        if (alreadyExisted) {
+            log.add("User re-conected: " + splitCmd.get(2));
+            respondToClient("Bienvenido de nuevo " + splitCmd.get(2));
+        } else {
+            User newUsr = new User(splitCmd.get(2));
+            Subastas.addSuscriber(newUsr);
+            log.add("User created: " + splitCmd.get(2));
+        }
+    }
 
     private void respondToClient(String response) {
         output.println(response);
