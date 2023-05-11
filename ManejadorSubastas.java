@@ -3,19 +3,18 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public enum ManejadorSubastas {
+public enum ManejadorSubastas{
 
     INSTANCE;
-
     private HashMap<Integer, Subasta> subastas;
     private HashMap<String, User> suscribers;
     private HashMap<Integer, SubastaSession> subastaSessions;
 
-    private ManejadorSubastas() {
+    private void ManejadorSubastas() {
         this.subastas = new HashMap<Integer, Subasta>();
         this.suscribers = new HashMap<String, User>();
     }
-
+    
     public ManejadorSubastas getInstance() {
         return INSTANCE;
     }
@@ -26,6 +25,9 @@ public enum ManejadorSubastas {
     
     public HashMap<Integer, Subasta> getSubastas(){
         return subastas;
+    }
+    public HashMap<Integer, SubastaSession> getSubastaSessions(){
+        return subastaSessions;
     }
             
     public synchronized void addSubasta(Subasta subasta) {
@@ -53,11 +55,12 @@ public enum ManejadorSubastas {
             users.sendMessage(message);
         }
     }
-
-    public synchronized void addSubastaSession(SubastaSession subastaSession) {
-        subastaSessions.put(subastaSession.getId(), subastaSession);
-    }
-
+    public void addSubastaSession(SubastaSession session){
+        subastaSessions.put(session.getId(), session);
+        for(Subasta subasta: session.getSubastas()){
+            subastas.put(subasta.getId(), subasta);
+        }
+    }
     public synchronized void removeSubastaSession(SubastaSession subastaSession) {
         subastaSessions.remove(subastaSession);
     }
@@ -71,6 +74,7 @@ public enum ManejadorSubastas {
     }
 
     public synchronized int subscribeToSubastaSession(String id_Client, Integer id_Subasta_Session) {
+        // if the subasta session doesnt exist, return 0
         if (subastaSessions.get(id_Subasta_Session) == null) {
             return 0;
         }
@@ -81,14 +85,17 @@ public enum ManejadorSubastas {
                 return 1;
             }
         }
-
+        //if the subasta session is finished, return 2
         if (subastaSessions.get(id_Subasta_Session).getIsFinished() == true) {
             return 2;
         } else {
+            //if everything is ok, subscribe the client to the subasta session,return 3
             subastaSessions.get(id_Subasta_Session).addClient(suscribers.get(id_Client));
+            suscribers.get(id_Client).subscribeToSubastaSession(id_Subasta_Session);
+            return 3;
         }
-        suscribers.get(id_Client).subscribeToSubastaSession(id_Subasta_Session);
-        return 3;
+        
+        
 
     }
 
@@ -104,36 +111,49 @@ public enum ManejadorSubastas {
         return id_SubastaSession;
     }
 
+
     public synchronized int subcribeToSubasta(String id_Client, Integer id_Subasta) {
+        // if the subasta doesnt exist, return 0
         if (subastas.get(id_Subasta) == null) {
             return 0;
         }
+        // if the subasta is started, return 1
         if (subastas.get(id_Subasta).getIsStarted() == true) {
             return 1;
         }
+        // if the subasta is over, return 2
         if (subastas.get(id_Subasta).getIsOver() == true) {
             return 2;
         } else {
+            // if everything is ok, subscribe the client to the subasta, return 3
             subastas.get(id_Subasta).addClient(suscribers.get(id_Client));
+            suscribers.get(id_Client).subscribeToSubasta(id_Subasta);
+            return 3;
         }
-        suscribers.get(id_Client).subscribeToSubasta(id_Subasta);
-        return 3;
+        
+        
     }
 
     public synchronized int unsubscribeToSubasta(Integer id_Client, Integer id_Subasta) {
+        // if the subasta doesnt exist, return 0
         if (subastas.get(id_Subasta) == null) {
             return 0;
         }
+        // if the subasta is started, return 1
         if (subastas.get(id_Subasta).getIsStarted() == true) {
             return 1;
         }
+        // if the subasta is over, return 2
         if (subastas.get(id_Subasta).getIsOver() == true) {
             return 2;
         } else {
+            // if everything is ok, unsubscribe the client to the subasta, return 3
             subastas.get(id_Subasta).removeClient(suscribers.get(id_Client));
+            suscribers.get(id_Client).unsubscribeToSubasta(id_Subasta);
+            return 3;
         }
-        suscribers.get(id_Client).unsubscribeToSubasta(id_Subasta);
-        return 3;
+        
+       
     }
 
 }

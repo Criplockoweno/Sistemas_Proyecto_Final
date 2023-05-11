@@ -11,7 +11,7 @@ public class Subasta implements Subject{
     private User maxBidClient;
     private boolean isOver;
     private boolean isStarted;
-    private ArrayList<User> clientsInterested;
+    private ArrayList<String> clientsInterested;
 
     public Subasta(Product product,int horaFin, int horaInicio, Integer id) {
         this.id = id;
@@ -23,7 +23,7 @@ public class Subasta implements Subject{
         this.maxBidClient = null;
         this.isOver = false;
         this.isStarted = false;
-        this.clientsInterested = new ArrayList<User>();
+        this.clientsInterested = new ArrayList<String>();
     }
 
     @Override
@@ -66,11 +66,11 @@ public class Subasta implements Subject{
         isStarted = true;
         notifyObservers();
     }
-    public void addClient(User client) {
+    public void addClient(String client) {
         clientsInterested.add(client);
         
     }
-    public void removeClient(User client) {
+    public void removeClient(String client) {
         clientsInterested.remove(client);
     }
     public boolean getIsStarted() {
@@ -88,8 +88,16 @@ public class Subasta implements Subject{
     public int getTimeLeft() {
         return timeLeft;
     }
-    public ArrayList<User> getClients() {
+    public ArrayList<String> getClients() {
         return clientsInterested;
+    }
+    public boolean isUserSuscribed(String id_Client){
+        boolean isSubscribed = false;
+        for (String client : clientsInterested) {
+            if(client.equals(id_Client))
+                isSubscribed= true;
+        }
+            return isSubscribed;         
     }
 }
 

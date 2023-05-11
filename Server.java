@@ -11,7 +11,28 @@ public class Server {
      
     public static void main(String[] args) throws IOException {
         
+        Product product1 = new Product("pintura", 100);
+        Product product2 = new Product("escultura", 200);
+        Product product3 = new Product("joya", 300);
 
+        Subasta subasta1 = new Subasta(product1, 10, 0, 1);
+        Subasta subasta2 = new Subasta(product2, 20, 10, 2);
+        Subasta subasta3 = new Subasta(product3, 30, 20, 3);
+
+        SubastaSession subastaSession = new SubastaSession("Arte", 1);
+
+        subastaSession.addSubasta(subasta1);
+        subastaSession.addSubasta(subasta2);
+        subastaSession.addSubasta(subasta3);
+
+        SubastaSession subastaSession2 = new SubastaSession("Autos", 2);
+        Product product4 = new Product("auto1", 100);
+        Subasta subasta4 = new Subasta(product4, 10, 0, 4);
+        subastaSession2.addSubasta(subasta4);
+
+        ManejadorSubastas Subastas = ManejadorSubastas.INSTANCE.getInstance();
+        Subastas.addSubastaSession(subastaSession);
+        Subastas.addSubastaSession(subastaSession2);
         
         Log log = new Log("server");
         //using serversocket as argument to automatically close the socket

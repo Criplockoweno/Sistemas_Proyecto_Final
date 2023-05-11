@@ -32,4 +32,11 @@ public class User {
     public void unsubscribeToSubasta(int id_Subasta){
         subastasInteresados.remove(id_Subasta);
     }
+    public ArrayList<Integer> getSubastaSessionInteresados(){
+        return subastaSessionInteresados;
+    }
+    public ArrayList<Integer> getSubastasInteresados(){
+        return subastasInteresados;
+    }
+    
 }

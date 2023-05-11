@@ -1,4 +1,3 @@
-public abstract class Observer {
-    protected Subject subject;
+public abstract interface Observer {
     public abstract void update();
  }
