@@ -10,6 +10,9 @@ public class Server {
 
      
     public static void main(String[] args) throws IOException {
+        
+
+        
         Log log = new Log("server");
         //using serversocket as argument to automatically close the socket
         //the port number is unique for each server
