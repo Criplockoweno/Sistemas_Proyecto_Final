@@ -15,9 +15,9 @@ public class Server {
         Product product2 = new Product("escultura", 200);
         Product product3 = new Product("joya", 300);
 
-        Subasta subasta1 = new Subasta(product1, 10, 0, 1);
-        Subasta subasta2 = new Subasta(product2, 20, 10, 2);
-        Subasta subasta3 = new Subasta(product3, 30, 20, 3);
+        Subasta subasta1 = new Subasta(product1, 1,5);
+        Subasta subasta2 = new Subasta(product2, 2, 10);
+        Subasta subasta3 = new Subasta(product3, 3, 15);
 
         SubastaSession subastaSession = new SubastaSession("Arte", 1);
 
@@ -27,7 +27,7 @@ public class Server {
 
         SubastaSession subastaSession2 = new SubastaSession("Autos", 2);
         Product product4 = new Product("auto1", 100);
-        Subasta subasta4 = new Subasta(product4, 10, 0, 4);
+        Subasta subasta4 = new Subasta(product4, 1, 5);
         subastaSession2.addSubasta(subasta4);
 
         ManejadorSubastas Subastas = ManejadorSubastas.INSTANCE.getInstance();

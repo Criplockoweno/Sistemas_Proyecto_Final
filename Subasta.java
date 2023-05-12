@@ -1,53 +1,78 @@
 // Purpose: Class that represents a subasta
 import java.util.ArrayList;
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class Subasta implements Subject{
     private Integer id;
     private Observer observer;
     private Product product;
     private int timeLeft;
-    private int horaInicio;
-    private int horaFin;
+    private int duration;
+    private LocalDateTime horaInicio;
+    private LocalDateTime horaFin; 
     private int maxBid;
-    private User maxBidClient;
+    private String maxBidClient;
     private boolean isOver;
     private boolean isStarted;
     private ArrayList<String> clientsInterested;
 
-    public Subasta(Product product,int horaFin, int horaInicio, Integer id) {
+    public Subasta(Product product, Integer id, int duration) {
         this.id = id;
         this.product = product;
-        this.timeLeft = horaFin - horaInicio;
-        this.horaInicio = horaInicio;
-        this.horaFin = horaFin;
         this.maxBid = product.getbasePrice();
         this.maxBidClient = null;
         this.isOver = false;
         this.isStarted = false;
         this.clientsInterested = new ArrayList<String>();
+        this.horaInicio = LocalDateTime.now();
+        this.horaFin = horaInicio.plusMinutes(duration);
     }
 
-    @Override
-    public void addObserver(Observer o){
-        observer=o;
+    public String countdown() {
+        LocalDateTime now = LocalDateTime.now();
+        Duration duration = Duration.between(now, horaFin);
+        long seconds = Math.max(duration.getSeconds(), 0);
+        this.timeLeft = (int) seconds;
+        int minutes = (int) seconds / 60;
+        int remainingSeconds = (int) seconds % 60;
+        if (seconds == 0) {
+            isOver = true;
+        }
+        return ("Tiempo restante: " + minutes + " minutos y " + remainingSeconds + " segundos");
+    }
+    public void initilizeSubasta() {
+        isStarted=true;
+        for (String client : clientsInterested) {
+            client.sendMessage("Se ha iniciado una subasta de " + product.getName() + " con un precio base de " + product.getbasePrice() + countdown());
+        }
     }
 
-    @Override
-    public void removeObserver(Observer o){
-        o=null;
+    public void sendInfo(){
+        for (String client : clientsInterested) {
+        client.sendMessage("Subasta: " + id +" "+ product.getName() + " se ha pujado " + maxBid + " " + countdown());
+        }
     }
-
-    @Override
-    public void notifyObservers(){
-        observer.update();
+    
+    public void terminate(){
+        for (String client : clientsInterested) {
+        client.sendMessage("Subasta: " + id +" "+ product.getName() + " ha terminado " + maxBid + " " + countdown());
+        }
     }
     public void setTimeLeft(int timeLeft) {
         this.timeLeft = timeLeft;
         notifyObservers();
     }
-    public void setMaxBet(int maxBet, User client) {
-        this.maxBidClient = client;
-        this.maxBid = maxBet;
+    public boolean Bet(int maxBet, String id_client) {
+        if (maxBet > maxBid) {
+            this.maxBid = maxBet;
+            this.maxBidClient = id_client;
+            sendInfo();
+            return true;
+        }
+        
         notifyObservers();
+        return false;
     }
     public int gettimeLeft() {
         return timeLeft;
@@ -57,7 +82,7 @@ public class Subasta implements Subject{
         notifyObservers();
     }
     public String toString() {
-        return "Subasta: " + product.getName() + " " + product.getbasePrice() + " " + horaInicio + " " + horaFin;
+        return "Subasta: " + id +" "+ product.getName() + " " + product.getbasePrice() + " " + horaInicio + " " + horaFin;
     }
     public int  getState() {
         return timeLeft;
@@ -98,6 +123,21 @@ public class Subasta implements Subject{
                 isSubscribed= true;
         }
             return isSubscribed;         
+    }
+
+    @Override
+    public void addObserver(Observer o){
+        observer=o;
+    }
+
+    @Override
+    public void removeObserver(Observer o){
+        o=null;
+    }
+
+    @Override
+    public void notifyObservers(){
+        observer.update();
     }
 }
 
