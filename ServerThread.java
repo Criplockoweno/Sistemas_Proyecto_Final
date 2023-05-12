@@ -14,6 +14,7 @@ public class ServerThread extends Thread {
     private ArrayList<ServerThread> threadList;
     private PrintWriter output;
     private Log log = new Log("server");
+
     ManejadorSubastas Subastas = ManejadorSubastas.INSTANCE.getInstance();
 
     public ServerThread(Socket socket, ArrayList<ServerThread> threads) {
@@ -44,6 +45,7 @@ public class ServerThread extends Thread {
 
         } catch (Exception e) {
             System.out.println("Error occured " + e.getStackTrace());
+            System.out.println("Error occured " + e.getMessage());
         }
     }
 
@@ -58,8 +60,8 @@ public class ServerThread extends Thread {
             }
 
             case "menu-1" -> { //Suscripciones activas
-                respondToClient("option1");
-                User tempUSr = findUser(command);
+                respondSubscripcionesActivas(command);
+                //User tempUSr = findUser(command);
             }
 
             case "menu-2" -> {//Subastas terminadas
@@ -80,25 +82,65 @@ public class ServerThread extends Thread {
                 respondToClient("Ingresa el ID de la subasta para subscribirte, exit para salir");
 
             }
+            
+            case "menu-4" -> {//Subastas activas
+                //TODO add subastassesion. to string
+//                for (Entry<Integer, SubastaSession> entry : Subastas.getSubastaSessions().entrySet()) {
+//                    if (!entry.getValue().getIsOver()) {
+//                        respondToClient(entry.toString());
+//                    }
+//
+//                }
+//                respondToClient("Ingresa el ID de la session de subasta para subscribirte, exit para salir");
+
+            }
+
 
             case "sub-menu-3" -> {//Subastas activas
-                int responseInt =0;
-                for (Entry<Integer, Subasta> entry : Subastas.getSubastas().entrySet()) {
-                    responseInt = Subastas.subcribeToSubasta(splitCmd.get(1), Integer.valueOf(splitCmd.get(3)));
-                }
-                switch(responseInt){
+                int responseInt = 0;
+                responseInt = Subastas.subcribeToSubasta(splitCmd.get(0), Integer.valueOf(splitCmd.get(2)));
+
+                switch (responseInt) {
                     case 0:
-                        respondToClient("No se ingreso ID de subasta");
+                        respondToClient("Error: La subasta no existe");
                         break;
                     case 1:
+                        respondToClient("Error: Esta subasta ya comenzó");
                         break;
                     case 2:
+                        respondToClient("Error: Esta subasta ya a terminado");
                         break;
                     case 3:
-                        break;    
+                        respondToClient("Subscripción exitosa");
+                        break;
                 }
-                respondToClient("Ingresa el ID de la subasta para subscribirte, exit para salir");
+                respondToClient("Ingresa el ID de la subasta a subscribirte, exit para salir");
 
+            }
+            case "menu-5" -> {
+                respondSubscripcionesActivas(command);
+                respondToClient("Ingresa el ID de la subasta a desubscribirte, exit para salir");
+            }
+            
+            case "sub-menu-5" -> {
+                int responseInt = 0;
+                responseInt = Subastas.unsubscribeToSubasta(splitCmd.get(0), Integer.valueOf(splitCmd.get(2)));
+
+                switch (responseInt) {
+                    case 0:
+                        respondToClient("Error: La subasta no existe");
+                        break;
+                    case 1:
+                        respondToClient("Error: Esta subasta ya comenzó");
+                        break;
+                    case 2:
+                        respondToClient("Error: Esta subasta ya a terminado");
+                        break;
+                    case 3:
+                        respondToClient("Desubscripción exitosa");
+                        break;
+                }
+                respondToClient("Ingresa el ID de la subasta a desubscribirte, exit para salir");
             }
 
             default -> {
@@ -108,19 +150,30 @@ public class ServerThread extends Thread {
         //respondToClient("Hola cliente");
     }
 
-    private User findUser(String command){
+    private void respondSubscripcionesActivas(String command) {
+        ArrayList<String> splitCmd = new ArrayList<>(Arrays.asList(command.split("!!")));
+        for (Entry<Integer, SubastaSession> entry : Subastas.getSubastaSessions().entrySet()) {
+            for (Subasta subasta : entry.getValue().getSubastas()) {
+                if (subasta.isUserSuscribed(splitCmd.get(0))) {
+                    respondToClient(subasta.toString());
+                }
+            }
+        }
+    }
+
+    private User findUser(String command) {
         ArrayList<String> splitCmd = new ArrayList<>(Arrays.asList(command.split("!!")));
         User temp = null;
-        
+
         for (Entry<String, User> entry : Subastas.getSubscribers().entrySet()) {
             if (entry.getValue().getName().equals(splitCmd.get(1))) {
                 temp = entry.getValue();
             }
         }
         return temp;
-    
+
     }
-    
+
     private void caseAddName(String command) throws IOException {
         ArrayList<String> splitCmd = new ArrayList<>(Arrays.asList(command.split("!!")));
         Boolean alreadyExisted = false;

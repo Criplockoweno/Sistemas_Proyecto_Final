@@ -55,7 +55,9 @@ public class Client {
                         System.out.println("\nIngrese un número para seleccionar una opción:");
                         System.out.println("\t1. Suscripciones activas");
                         System.out.println("\t2. Subastas terminadas");
-                        System.out.println("\t3. Sesiones de Subasta disponibles");
+                        System.out.println("\t3. Subastas disponibles");
+                        System.out.println("\t4. Sesiones de Subasta disponibles");
+                        System.out.println("\t5. Desubscribirme");
                         System.out.println("\t0. Salir");
                         System.out.print("> ");
                         // Get user input
@@ -65,14 +67,15 @@ public class Client {
                         if (userOpt.matches("\\d+")) {
                             int option = Integer.parseInt(userOpt);
 
-                            if (option >= 0 && option <= 3) {
+                            if (option >= 0 && option <= 5) {
                                 // Execute selected option
                                 switch (option) {
                                     case 1:
-                                        sendMessage(socket, scanner, clientName, output, input, "menu-" + option);
                                         log.add("Selected Suscripciones activas");
                                         System.out.println("\tSuscripciones activas");
-
+                                        sendMessage(socket, scanner, clientName, output, input, "menu-" + option);
+                                        sendResponse(socket, scanner, clientName, output, input, "sub-menu-" + option + "!!");
+                                        
                                         break;
                                     case 2:
                                         sendMessage(socket, scanner, clientName, output, input, "menu-" + option);
@@ -87,6 +90,16 @@ public class Client {
                                         sendMessage(socket, scanner, clientName, output, input, "menu-" + option);
                                         sendResponse(socket, scanner, clientName, output, input, "sub-menu-" + option + "!!");
                                         break;
+                                    case 4:
+                                        log.add("\tSelected Sesiones de Subasta disponibles");
+                                        sendMessage(socket, scanner, clientName, output, input, "menu-" + option);
+                                        break;
+                                    case 5:
+                                        log.add("\tSelected Desubscribirme");
+                                        sendMessage(socket, scanner, clientName, output, input, "menu-" + option);
+                                        sendResponse(socket, scanner, clientName, output, input, "sub-menu-" + option + "!!");
+                                        break;
+                                                                                
                                     case 0:
                                         log.add("Exiting program...");
                                         System.out.println("Exiting program...");
