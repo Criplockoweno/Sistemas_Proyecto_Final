@@ -24,7 +24,8 @@ public class ClientRunnable implements Runnable {
                     if(response==null){
                         break;
                     }else{
-                    System.out.println(response);}
+                    System.out.println(response);
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();

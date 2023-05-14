@@ -1,5 +1,6 @@
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -24,7 +25,7 @@ public class Client {
             String userInput;
             String response;
             String clientName = "empty";
-            
+            int idSubasta = 0;
             // create a new thread to handle incoming messages from the server
             ClientRunnable clientRun = new ClientRunnable(socket);
 
@@ -73,31 +74,33 @@ public class Client {
                                     case 1:
                                         log.add("Selected Suscripciones activas");
                                         System.out.println("\tSuscripciones activas");
-                                        sendMessage(socket, scanner, clientName, output, input, "menu-" + option);
-                                        sendResponse(socket, scanner, clientName, output, input, "sub-menu-" + option + "!!");
-                                        
+                                        sendMessage(socket, scanner, clientName, output, input, "menu-" + option,log);
+                                        idSubasta = Integer.valueOf(sendResponseMenu1(socket, scanner, clientName, output, input, "sub-menu-" + option + "!!",log));
+                                        sendBidResponse(socket, scanner, clientName, output, input, "sub-sub-menu-1!!",log);
                                         break;
                                     case 2:
-                                        sendMessage(socket, scanner, clientName, output, input, "menu-" + option);
+                                        
                                         log.add("Selected Subastas terminadas");
                                         System.out.println("\tSubastas terminadas");
-                                        System.out.println("Press enter to continue...");
+                                        sendMessage(socket, scanner, clientName, output, input, "menu-" + option,log);
+                                        
                                         scanner.nextLine(); // waits for the user to press enter
                                         break;
                                     case 3:
                                         log.add("\tSelected Subasta disponibles");
-                                        System.out.println("Sesiones de Subasta disponibles");
-                                        sendMessage(socket, scanner, clientName, output, input, "menu-" + option);
-                                        sendResponse(socket, scanner, clientName, output, input, "sub-menu-" + option + "!!");
+                                        System.out.println("Subastas disponibles");
+                                        sendMessage(socket, scanner, clientName, output, input, "menu-" + option,log);
+                                        sendResponse(socket, scanner, clientName, output, input, "sub-menu-" + option + "!!",log);
                                         break;
                                     case 4:
                                         log.add("\tSelected Sesiones de Subasta disponibles");
-                                        sendMessage(socket, scanner, clientName, output, input, "menu-" + option);
+                                        sendMessage(socket, scanner, clientName, output, input, "menu-" + option,log);
+                                        sendResponse(socket, scanner, clientName, output, input, "sub-menu-" + option + "!!",log);
                                         break;
                                     case 5:
                                         log.add("\tSelected Desubscribirme");
-                                        sendMessage(socket, scanner, clientName, output, input, "menu-" + option);
-                                        sendResponse(socket, scanner, clientName, output, input, "sub-menu-" + option + "!!");
+                                        sendMessage(socket, scanner, clientName, output, input, "menu-" + option,log);
+                                        sendResponse(socket, scanner, clientName, output, input, "sub-menu-" + option + "!!",log);
                                         break;
                                                                                 
                                     case 0:
@@ -126,7 +129,7 @@ public class Client {
     }
     
     //Leer y respuesta, sin pre-command
-    public static void sendReadMessage(Socket socket, Scanner scanner, String clientName, PrintWriter output, BufferedReader input) {
+    public static void sendReadMessage(Socket socket, Scanner scanner, String clientName, PrintWriter output, BufferedReader input,Log log) throws IOException {
         String userInput;
         String message = (clientName + "!!");
         System.out.print("> ");
@@ -135,10 +138,28 @@ public class Client {
         if (userInput.equals("exit")) {
             //reading the input from server
         }
+        logMessage(log,message + userInput);
     }
 
     //Lerr en loop y enviar respuesta con un pre-command 
-    public static void sendResponse(Socket socket, Scanner scanner, String clientName, PrintWriter output, BufferedReader input, String preCommand) {
+    public static void sendResponse(Socket socket, Scanner scanner, String clientName, PrintWriter output, BufferedReader input, String preCommand,Log log) throws IOException {
+        String userInput;
+        String message = (clientName + "!!");
+        //System.out.print("> ");
+        userInput = scanner.nextLine();
+        while (!userInput.equals("exit")) {
+            //System.out.print("> ");
+            if (!userInput.equals("exit")) {
+                output.println(message + preCommand + userInput);
+                logMessage(log,message + preCommand + userInput);
+            }
+            userInput = scanner.nextLine();
+            
+        }
+
+    }
+    
+    public static void sendBidResponse(Socket socket, Scanner scanner, String clientName, PrintWriter output, BufferedReader input, String preCommand,Log log) throws IOException {
         String userInput;
         String message = (clientName + "!!");
         //System.out.print("> ");
@@ -149,14 +170,31 @@ public class Client {
                 output.println(message + preCommand + userInput);
             }
             userInput = scanner.nextLine();
+            logMessage(log,message + preCommand + userInput);
         }
-
+        output.println(message + preCommand + "exit_bid");
+        logMessage(log,message + preCommand + "exit_bid");
+    }
+    
+    public static String sendResponseMenu1(Socket socket, Scanner scanner, String clientName, PrintWriter output, BufferedReader input, String preCommand,Log log) throws IOException {
+        String userInput;
+        String message = (clientName + "!!");
+        userInput = scanner.nextLine();
+        output.println(message + preCommand + userInput);
+        logMessage(log,userInput);
+        return userInput;
+        
     }
 
     //Enviar respuesta
-    public static void sendMessage(Socket socket, Scanner scanner, String clientName, PrintWriter output, BufferedReader input, String usrMessage) {
+    public static void sendMessage(Socket socket, Scanner scanner, String clientName, PrintWriter output, BufferedReader input, String usrMessage,Log log) throws IOException {
         String message = (clientName + "!!");
         output.println(message + usrMessage);
+        logMessage(log,usrMessage);
     }
-
+    
+    public static void logMessage(Log log,String message) throws IOException{
+        log.add(" Sent to server:"+message);
+    }
+    
 }

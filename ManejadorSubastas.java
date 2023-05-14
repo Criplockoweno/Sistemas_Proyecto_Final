@@ -10,10 +10,11 @@ public enum ManejadorSubastas{
     private HashMap<String, User> suscribers;
     private HashMap<Integer, SubastaSession> subastaSessions;
 
-    private void ManejadorSubastas() {
-        this.subastas = new HashMap<Integer, Subasta>();
-        this.suscribers = new HashMap<String, User>();
-        this.subastaSessions = new HashMap<Integer, SubastaSession>();
+    ManejadorSubastas() {
+        //System.out.println("costructor called");
+        this.subastas = new HashMap<>();
+        this.suscribers = new HashMap<>();
+        this.subastaSessions = new HashMap<>();
     }
     
     public ManejadorSubastas getInstance() {
@@ -57,7 +58,11 @@ public enum ManejadorSubastas{
         }
     }
     public void addSubastaSession(SubastaSession session){
+        
+       // System.out.println(session.getId());
+        
         subastaSessions.put(session.getId(), session);
+        
         for(Subasta subasta: session.getSubastas()){
             subastas.put(subasta.getId(), subasta);
         }
@@ -140,6 +145,7 @@ public enum ManejadorSubastas{
         if (subastas.get(id_Subasta) == null) {
             return 0;
         }
+        
         // if the subasta is started, return 1
         if (subastas.get(id_Subasta).getIsStarted() == true) {
             return 1;
@@ -148,9 +154,11 @@ public enum ManejadorSubastas{
         if (subastas.get(id_Subasta).getIsOver() == true) {
             return 2;
         } else {
+
             // if everything is ok, unsubscribe the client to the subasta, return 3
             subastas.get(id_Subasta).removeClient(id_Client);
             suscribers.get(id_Client).unsubscribeToSubasta(id_Subasta);
+            //System.out.println("flag 4");
             return 3;
         }
         
