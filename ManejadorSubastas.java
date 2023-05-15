@@ -87,7 +87,7 @@ public enum ManejadorSubastas{
 
         //if a client isnt subscribed to a subasta, he cant subscribe to a subasta session
         for (Subasta subasta : subastaSessions.get(id_Subasta_Session).getSubastas()) {
-            if (!(subasta.getClients().contains(suscribers.get(id_Client)))) {
+            if ((subasta.getClients().contains(suscribers.get(id_Client)))) {
                 return 1;
             }
         }
@@ -98,6 +98,11 @@ public enum ManejadorSubastas{
             //if everything is ok, subscribe the client to the subasta session,return 3
             subastaSessions.get(id_Subasta_Session).addClient(suscribers.get(id_Client));
             suscribers.get(id_Client).subscribeToSubastaSession(id_Subasta_Session);
+            
+            for(Subasta subasta: subastaSessions.get(id_Subasta_Session).getSubastas()){
+                subasta.addClient(id_Client);
+                suscribers.get(id_Client).subscribeToSubasta(subasta.getId());
+            }
             return 3;
         }
         
