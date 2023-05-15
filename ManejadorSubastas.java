@@ -97,7 +97,12 @@ public enum ManejadorSubastas{
         } else {
             //if everything is ok, subscribe the client to the subasta session,return 3
             subastaSessions.get(id_Subasta_Session).addClient(suscribers.get(id_Client));
-            suscribers.get(id_Client).subscribeToSubastaSession(id_Subasta_Session); 
+            suscribers.get(id_Client).subscribeToSubastaSession(id_Subasta_Session);
+            
+            for(Subasta subasta: subastaSessions.get(id_Subasta_Session).getSubastas()){
+                subasta.addClient(id_Client);
+                suscribers.get(id_Client).subscribeToSubasta(subasta.getId());
+            }
             return 3;
         }
         

@@ -30,6 +30,10 @@ public class ServerThread extends Thread {
         subastaConnected = 0;
     }
 
+    public int getsubastaConnected() {
+        return subastaConnected;
+    }
+
     @Override
     public void run() {
         try {
@@ -75,87 +79,93 @@ public class ServerThread extends Thread {
 
             case "sub-menu-1" -> { //Suscripciones activas
                 log.add(splitCmd.get(0) + " ingreso a sub-menu-1");
-                int idSubasta = Integer.valueOf(splitCmd.get(2));
-                Subasta subastaSuscrita = null;
-                Boolean exito = false;
-                for (Entry<Integer, SubastaSession> entry : Subastas.getSubastaSessions().entrySet()) {
-                    for (Subasta subasta : entry.getValue().getSubastas()) {
-                        if (subasta.getId() == idSubasta && subasta.isUserSuscribed(splitCmd.get(0))) {
-                            subastaConnected = idSubasta;
-                            subastaSuscrita = subasta;
-                            exito = true;
+                System.out.println("flag:" + splitCmd.get(2));
+
+                if (splitCmd.get(2).equals("exit")) {
+                    System.out.println("flag2");
+                } else {
+                    System.out.println("flag3");
+                    int idSubasta = Integer.parseInt(splitCmd.get(2));
+                    Subasta subastaSuscrita = null;
+                    Boolean exito = false;
+                    for (Entry<Integer, SubastaSession> entry : Subastas.getSubastaSessions().entrySet()) {
+                        for (Subasta subasta : entry.getValue().getSubastas()) {
+                            if (subasta.getId() == idSubasta && subasta.isUserSuscribed(splitCmd.get(0))) {
+                                subastaConnected = idSubasta;
+                                subastaSuscrita = subasta;
+                                exito = true;
+                            }
                         }
                     }
-                }
-                if (!exito) {
-                    subastaConnected = 0;
+                    if (!exito) {
+                        subastaConnected = 0;
 
-                }
-
-                if (subastaConnected != 0) {
-                    respondToClient(subastaSuscrita.getLastMove());
-                    //respondToClient("Conection to subasta stablished");
-                    log.add(splitCmd.get(0) + " ingresó a la puja ID: " + subastaSuscrita.getId());
-                    respondToClient("Ingresa el valor a pujar, exit para salir");
-                } else {
-                    log.add(splitCmd.get(0) + " no pudo ingresar a la sale en sub-menu-1");
-                    respondToClient("No se pudo ingresar a la sala, ingresa 'exit'");
-                }
-
-                var time_left_copy = subastaSuscrita.getHoraFin();
-
-                Runnable timeRunnable = () -> {
-                    final var time_left = time_left_copy;
-                    LocalDateTime current_time;
-                    Duration duration;
-                    long total_seconds;
-                    long minutes;
-                    long seconds;
-
-                    while (time_left.isAfter(LocalDateTime.now()) && subastaConnected != 0) { // loop until time_left is in the past
-                        current_time = LocalDateTime.now();
-                        duration = Duration.between(current_time, time_left);
-                        total_seconds = duration.getSeconds();
-                        minutes = total_seconds / 60;
-                        seconds = total_seconds % 60;
-
-                        if (total_seconds > 60) {
-                            respondToClient("Time left: " + minutes + " minutes " + seconds + " seconds");
-                            try {
-                                Thread.sleep(60000); // sleep for 1 minute
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        } else if (total_seconds > 10) {
-                            respondToClient("Time left: " + seconds + " seconds");
-                            try {
-                                Thread.sleep(10000); // sleep for 10 seconds
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        } else {
-                            respondToClient("Time left: " + seconds + " seconds");
-                            try {
-                                Thread.sleep(1000); // sleep for 1 second
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-
-                        //time_left = LocalDateTime.now().plusMinutes(5); // replace with actual value obtained from getTimeLeft()
                     }
 
-                };
+                    if (subastaConnected != 0) {
+                        respondToClient(subastaSuscrita.getLastMove());
+                        //respondToClient("Conection to subasta stablished");
+                        log.add(splitCmd.get(0) + " ingresó a la puja ID: " + subastaSuscrita.getId());
+                        respondToClient("Ingresa el valor a pujar, exit para salir");
+                    } else {
+                        log.add(splitCmd.get(0) + " no pudo ingresar a la sale en sub-menu-1");
+                        respondToClient("No se pudo ingresar a la sala, ingresa 'exit'");
+                    }
 
-                Thread timeThread = new Thread(timeRunnable);
+                    var time_left_copy = subastaSuscrita.getHoraFin();
 
-                if (timeThread.isAlive()) {
-                    //System.out.println("thread time is already running");
-                } else {
-                    //System.out.println("thread time started");
-                    timeThread.start();
+                    Runnable timeRunnable = () -> {
+                        final var time_left = time_left_copy;
+                        LocalDateTime current_time;
+                        Duration duration;
+                        long total_seconds;
+                        long minutes;
+                        long seconds;
+
+                        while (time_left.isAfter(LocalDateTime.now()) && subastaConnected != 0) { // loop until time_left is in the past
+                            current_time = LocalDateTime.now();
+                            duration = Duration.between(current_time, time_left);
+                            total_seconds = duration.getSeconds();
+                            minutes = total_seconds / 60;
+                            seconds = total_seconds % 60;
+
+                            if (total_seconds > 60) {
+                                respondToClient("Time left: " + minutes + " minutes " + seconds + " seconds");
+                                try {
+                                    Thread.sleep(60000); // sleep for 1 minute
+                                } catch (InterruptedException ex) {
+                                    Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            } else if (total_seconds > 10) {
+                                respondToClient("Time left: " + seconds + " seconds");
+                                try {
+                                    Thread.sleep(10000); // sleep for 10 seconds
+                                } catch (InterruptedException ex) {
+                                    Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            } else {
+                                respondToClient("Time left: " + seconds + " seconds");
+                                try {
+                                    Thread.sleep(1000); // sleep for 1 second
+                                } catch (InterruptedException ex) {
+                                    Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
+
+                            //time_left = LocalDateTime.now().plusMinutes(5); // replace with actual value obtained from getTimeLeft()
+                        }
+
+                    };
+
+                    Thread timeThread = new Thread(timeRunnable);
+
+                    if (timeThread.isAlive()) {
+                        //System.out.println("thread time is already running");
+                    } else {
+                        //System.out.println("thread time started");
+                        timeThread.start();
+                    }
                 }
-
             }
             case "sub-sub-menu-1" -> {
 
@@ -189,10 +199,13 @@ public class ServerThread extends Thread {
                         Boolean response = subastaSuscrita.Bet(Integer.valueOf(splitCmd.get(2)), splitCmd.get(0));
                         if (response) {
                             respondToClient("Puja exitosa");
-                            log.add("-" + splitCmd.get(0) + " ha pujado " + formatMoney(Integer.valueOf(splitCmd.get(2)))+" por "+subastaSuscrita.getProduct().getName());
+                            log.add("-" + splitCmd.get(0) + " ha pujado " + formatMoney(Integer.valueOf(splitCmd.get(2))) + " por " + subastaSuscrita.getProduct().getName());
                             for (ServerThread sT : threadList) {
-                                System.out.println(sT.socket.getRemoteSocketAddress());
-                                sT.output.println("-" + splitCmd.get(0) + " ha pujado " + formatMoney(Integer.valueOf(splitCmd.get(2))));
+                                if (sT.getsubastaConnected() != 0 && sT.getsubastaConnected() == subastaSuscrita.getId()) {
+                                    System.out.println(sT.socket.getRemoteSocketAddress());
+                                    sT.output.println("-" + splitCmd.get(0) + " ha pujado " + formatMoney(Integer.valueOf(splitCmd.get(2))));
+
+                                }
                             }
                         } else {
                             log.add(splitCmd.get(0) + ": puja fallida");
