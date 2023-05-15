@@ -21,5 +21,9 @@ Finalmente, se puede ver las sesiones terminadas accediendo a la ocpión respect
 
 ## Contribuciones
 Sebastián Romero: Codificación de comunicación Server-Cliente + manejo de hilos de subasta + mejoras en código e implementación.
+
 Alexander Pástor: Creación de diagramas robustos del proyecto, además de las descripciones de casos de uso.
+
 Stefano Ulloa: creación del diagrama de casos de uso y la descripción de los mismos.
+
+Kristian Mendoza: creación de diagrama de Clases, Codificación de las clases de producto, subastas,sesiones, manejador de subastas y mejoras en el código.
