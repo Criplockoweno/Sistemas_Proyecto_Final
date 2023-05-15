@@ -87,7 +87,7 @@ public enum ManejadorSubastas{
 
         //if a client isnt subscribed to a subasta, he cant subscribe to a subasta session
         for (Subasta subasta : subastaSessions.get(id_Subasta_Session).getSubastas()) {
-            if (!(subasta.getClients().contains(suscribers.get(id_Client)))) {
+            if (subasta.getClients().contains(suscribers.get(id_Client))) {
                 return 1;
             }
         }
@@ -97,7 +97,7 @@ public enum ManejadorSubastas{
         } else {
             //if everything is ok, subscribe the client to the subasta session,return 3
             subastaSessions.get(id_Subasta_Session).addClient(suscribers.get(id_Client));
-            suscribers.get(id_Client).subscribeToSubastaSession(id_Subasta_Session);
+            suscribers.get(id_Client).subscribeToSubastaSession(id_Subasta_Session); 
             return 3;
         }
         
@@ -106,15 +106,10 @@ public enum ManejadorSubastas{
     }
 
     // to do, control how to unsuscribe with the the number of subastas interesadas 
-    public synchronized int unsubscribeToSubastaSession(Integer id_Client, Integer id_Subasta_Session) {
+    public synchronized int unsubscribeToSubastaSession(String id_Client, Integer id_Subasta_Session) {
         subastaSessions.get(id_Subasta_Session).removeClient(suscribers.get(id_Client));
+        suscribers.get(id_Client).unsubscribeToSubastaSession(id_Subasta_Session);
         return 1;
-    }
-
-    public synchronized int findSubastaSessionOfaSubasta(int id_Subasta) {
-        int id_SubastaSession = 0;
-
-        return id_SubastaSession;
     }
 
 

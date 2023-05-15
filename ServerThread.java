@@ -70,7 +70,7 @@ public class ServerThread extends Thread {
             case "menu-1" -> { //Suscripciones activas
                 log.add(splitCmd.get(0) + " ingreso a menu-1");
                 respondSubscripcionesActivas(command);
-                respondToClient("Ingresa el ID de la sesion para entrar a una sala de puja, exit para salir");
+                respondToClient("Ingresa el ID de la sesion para entrar a una sala de puja, exit para salir");   
             }
 
             case "sub-menu-1" -> { //Suscripciones activas
