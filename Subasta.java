@@ -36,18 +36,16 @@ public class Subasta implements Subject {
         this.isOver = false;
         this.isStarted = false;
         this.clientsInterested = new ArrayList<String>();
-        this.horaInicio = LocalDateTime.now();
-        this.horaFin = horaInicio.plusMinutes(duration);
+        this.horaInicio = LocalDateTime.now().plusMinutes(1);
+        this.horaFin = horaInicio.plusMinutes(duration + 1);
         log = new Log("server");
     }
 
     public LocalDateTime getHoraFin() {
         return horaFin;
     }
-    
-    
-    
-    public LocalDateTime getLocalDateTimeLeft(){
+
+    public LocalDateTime getLocalDateTimeLeft() {
         Duration duration = Duration.between(LocalDateTime.now(), horaFin);
         long millis = duration.toMillis();
         if (millis < 0) {
@@ -56,7 +54,6 @@ public class Subasta implements Subject {
             return horaFin.plus(Duration.ofMillis(millis));
         }
     }
-    
 
     public String countdown() {
         LocalDateTime now = LocalDateTime.now();
@@ -73,13 +70,13 @@ public class Subasta implements Subject {
 
     public String initilizeSubasta() throws IOException {
         isStarted = true;
-        String message = "Se ha iniciado una subasta de " + product.getName() + " con un precio base de " + product.getbasePrice() + countdown();
-        String preCommand = "Subasta!!init!!";
+        String message = "Se ha iniciado una subasta de " + product.getName() + " con un precio base de " + formatMoney(product.getbasePrice());
         log.add(message);
-        return message + preCommand;
-//        for (String client : clientsInterested) {
-//            client.sendMessage("Se ha iniciado una subasta de " + product.getName() + " con un precio base de " + product.getbasePrice() + countdown());
-//        }
+        return message;
+    }
+
+    public LocalDateTime getStartDateTime() {
+        return horaInicio;
     }
 
     public ArrayList<String> getClientsInterested() {
@@ -89,31 +86,27 @@ public class Subasta implements Subject {
     public void sendInfo() throws IOException {
         String message = "Subasta: " + id + " " + product.getName() + " se ha pujado " + formatMoney(maxBid) + " " + countdown();
         log.add(message);
-//        for (String client : clientsInterested) {
-//        client.sendMessage("Subasta: " + id +" "+ product.getName() + " se ha pujado " + maxBid + " " + countdown());
-//        }
+
     }
 
     public void terminate() throws IOException {
         String message = "Subasta: " + id + " " + product.getName() + " ha terminado " + formatMoney(maxBid) + " " + countdown();
         log.add(message);
-//        for (String client : clientsInterested) {
-//        client.sendMessage("Subasta: " + id +" "+ product.getName() + " ha terminado " + maxBid + " " + countdown());
-//        }
-    }
-public static String formatMoney(int amount) {
-    // Divide the amount by 100 to get the dollar value as a double
-    double dollars = amount;
-    
-    // Use a NumberFormat object to format the dollar value with commas and a period
-    NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
-    nf.setMaximumFractionDigits(3); // Set the maximum number of digits after the decimal point to 3
-    String formattedDollars = nf.format(dollars);
-    
-    // Add a dollar sign to the beginning of the formatted string and return it
-    return "$" + formattedDollars;
-}
 
+    }
+
+    public static String formatMoney(int amount) {
+        // Divide the amount by 100 to get the dollar value as a double
+        double dollars = amount;
+
+        // Use a NumberFormat object to format the dollar value with commas and a period
+        NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+        nf.setMaximumFractionDigits(3); // Set the maximum number of digits after the decimal point to 3
+        String formattedDollars = nf.format(dollars);
+
+        // Add a dollar sign to the beginning of the formatted string and return it
+        return "$" + formattedDollars;
+    }
 
     public void setTimeLeft(int timeLeft) {
         this.timeLeft = timeLeft;
@@ -121,15 +114,18 @@ public static String formatMoney(int amount) {
     }
 
     public boolean Bet(int maxBet, String id_client) throws IOException {
-        if (maxBet > maxBid) {
-            this.maxBid = maxBet;
-            this.maxBidClient = id_client;
-            //sendInfo();
-            return true;
+        Boolean response = false;
+        if (getIsStarted()) {
+            if (maxBet > maxBid) {
+                this.maxBid = maxBet;
+                this.maxBidClient = id_client;
+                //sendInfo();
+                response = true;
+            }
         }
 
         //notifyObservers();
-        return false;
+        return response;
     }
 
     public int gettimeLeft() {
@@ -138,7 +134,7 @@ public static String formatMoney(int amount) {
 
     public void isOver() {
         isOver = true;
-       //notifyObservers();
+        //notifyObservers();
     }
 
     @Override
@@ -222,15 +218,16 @@ public static String formatMoney(int amount) {
         }
         return message;
     }
-    
-    public String getLastMove(){
+
+    public String getLastMove() {
         String message = "";
         if (!maxBidClient.equals("")) {
-            message = "Ultima puja:\n\t"+maxBidClient + " pujó "+ formatMoney(maxBid);
+            message = "Ultima puja:\n\t" + maxBidClient + " pujó " + formatMoney(maxBid);
         } else {
-            message = "\t\t"+product.getName() + "\nNo hay ninguna puja todavía, precio base: "+formatMoney(product.getbasePrice());
+            message = "\t\t" + product.getName() + "\nNo hay ninguna puja todavía, precio base: " + formatMoney(product.getbasePrice());
         }
         return message;
-    
+
     }
+
 }

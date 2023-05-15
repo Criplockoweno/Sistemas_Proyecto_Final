@@ -18,7 +18,7 @@ public class ServerThread extends Thread {
 
     private Socket socket;
     private ArrayList<ServerThread> threadList;
-    private PrintWriter output;
+    public PrintWriter output;
     private Log log = new Log("server");
     private int subastaConnected;
 
@@ -82,9 +82,9 @@ public class ServerThread extends Thread {
                 System.out.println("flag:" + splitCmd.get(2));
 
                 if (splitCmd.get(2).equals("exit")) {
-                    System.out.println("flag2");
+
                 } else {
-                    System.out.println("flag3");
+
                     int idSubasta = Integer.parseInt(splitCmd.get(2));
                     Subasta subastaSuscrita = null;
                     Boolean exito = false;
@@ -103,16 +103,27 @@ public class ServerThread extends Thread {
                     }
 
                     if (subastaConnected != 0) {
-                        respondToClient(subastaSuscrita.getLastMove());
-                        //respondToClient("Conection to subasta stablished");
                         log.add(splitCmd.get(0) + " ingresó a la puja ID: " + subastaSuscrita.getId());
-                        respondToClient("Ingresa el valor a pujar, exit para salir");
+                        if (subastaSuscrita.getIsStarted()) {
+                            respondToClient(subastaSuscrita.getLastMove());
+                            respondToClient("Ingresa el valor a pujar, exit para salir");
+                        }else{
+                            respondToClient("La puja no ha comenzado");
+                            respondToClient("exit para salir");
+                        }
+                        //respondToClient("Conection to subasta stablished");
+                        
+                        
                     } else {
                         log.add(splitCmd.get(0) + " no pudo ingresar a la sale en sub-menu-1");
                         respondToClient("No se pudo ingresar a la sala, ingresa 'exit'");
                     }
 
                     var time_left_copy = subastaSuscrita.getHoraFin();
+//                    var start_time = subastaSuscrita.getStartDateTime();
+//                    String init = subastaSuscrita.initilizeSubasta();
+                    SubastaThread subastaThread = new SubastaThread(subastaSuscrita, this);
+                    subastaThread.start();
 
                     Runnable timeRunnable = () -> {
                         final var time_left = time_left_copy;
@@ -123,6 +134,7 @@ public class ServerThread extends Thread {
                         long seconds;
 
                         while (time_left.isAfter(LocalDateTime.now()) && subastaConnected != 0) { // loop until time_left is in the past
+
                             current_time = LocalDateTime.now();
                             duration = Duration.between(current_time, time_left);
                             total_seconds = duration.getSeconds();
@@ -130,7 +142,7 @@ public class ServerThread extends Thread {
                             seconds = total_seconds % 60;
 
                             if (total_seconds > 60) {
-                                respondToClient("Time left: " + minutes + " minutes " + seconds + " seconds");
+                                respondToClient("La puja acaba en: " + minutes + " minutes " + seconds + " seconds");
                                 try {
                                     Thread.sleep(60000); // sleep for 1 minute
                                 } catch (InterruptedException ex) {
@@ -226,6 +238,12 @@ public class ServerThread extends Thread {
             case "menu-2" -> {//Subastas terminadas
                 log.add(splitCmd.get(0) + "ingresó a menu-2");
                 for (Entry<Integer, Subasta> entry : Subastas.getSubastas().entrySet()) {
+                    LocalDateTime time_left = entry.getValue().getHoraFin();
+                    if (!time_left.isAfter(LocalDateTime.now())) {
+                        System.out.println("time_left " + time_left);
+                        System.out.println("time_now " + LocalDateTime.now());
+                        entry.getValue().isOver();
+                    }
                     if (entry.getValue().getIsOver()) {
                         respondToClient(entry.getValue().getWinner());
                     }
@@ -309,6 +327,14 @@ public class ServerThread extends Thread {
                 respondToClient("Subscripción exitosa");
                 break;
         }
+    }
+
+    public ArrayList<ServerThread> getThreadlist() {
+        return threadList;
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 
     private void responseSubMenu4(int responseInt) {
